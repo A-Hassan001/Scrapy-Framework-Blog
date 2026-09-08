@@ -1,0 +1,1928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scrapy Easy Learning Guide</title>
+
+    <!-- Modern Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #38bdf8;
+            --primary-dark: #0284c7;
+            --bg-main: #f8fafc;
+            --bg-card: #ffffff;
+            --sidebar-bg: #0f172a;
+            --sidebar-hover: #1e293b;
+            --text-main: #334155;
+            --text-heading: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
+            --code-bg: #0d1117;
+            --sidebar-width: 280px;
+            --header-height: 60px;
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-main);
+            color: var(--text-main);
+            line-height: 1.7;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* =========================
+           MOBILE TOP BAR
+        ========================= */
+        .mobile-header {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--header-height);
+            background: var(--sidebar-bg);
+            color: white;
+            padding: 0 20px;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 1100;
+            box-shadow: var(--shadow-md);
+        }
+
+        .mobile-header .logo-text {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .menu-toggle {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            transition: background 0.2s;
+        }
+
+        .menu-toggle:hover {
+            background: var(--sidebar-hover);
+        }
+
+        /* Overlay for mobile sidebar */
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(4px);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* =========================
+           SIDEBAR
+        ========================= */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--sidebar-bg);
+            color: #94a3b8;
+            overflow-y: auto;
+            padding: 24px 16px;
+            z-index: 1000;
+            transition: transform 0.3s ease;
+            scrollbar-width: thin;
+            scrollbar-color: #334155 transparent;
+        }
+
+        .sidebar::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-radius: 4px;
+        }
+
+        .logo {
+            text-align: left;
+            padding: 8px 12px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            color: #ffffff;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo h1 i {
+            color: var(--primary);
+        }
+
+        .logo p {
+            font-size: 0.8rem;
+            color: #64748b;
+            margin-top: 4px;
+            font-weight: 500;
+        }
+
+        .sidebar h3 {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-transform: uppercase;
+            margin: 24px 12px 8px;
+            letter-spacing: 1.2px;
+            font-weight: 700;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: #94a3b8;
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 2px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar a:hover {
+            background: var(--sidebar-hover);
+            color: var(--primary);
+            padding-left: 16px;
+        }
+
+        /* =========================
+           MAIN CONTENT
+        ========================= */
+        .main {
+            margin-left: var(--sidebar-width);
+            padding: 40px 48px;
+            max-width: 1300px;
+            transition: margin 0.3s ease;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+            color: white;
+            padding: 48px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 32px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .hero::after {
+            content: '\f121';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            position: absolute;
+            right: -20px;
+            bottom: -30px;
+            font-size: 15rem;
+            opacity: 0.03;
+            color: #fff;
+            pointer-events: none;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(56, 189, 248, 0.15);
+            color: var(--primary);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 12px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            max-width: 750px;
+            color: #94a3b8;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            margin-bottom: 0;
+        }
+
+        section {
+            background: var(--bg-card);
+            padding: 36px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--border-color);
+            scroll-margin-top: 30px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        section:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        section h2 {
+            color: var(--text-heading);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        section h3 {
+            margin-top: 24px;
+            margin-bottom: 12px;
+            color: var(--text-heading);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        p {
+            margin-bottom: 16px;
+            color: var(--text-main);
+        }
+
+        ul, ol {
+            margin-left: 20px;
+            margin-bottom: 20px;
+            color: var(--text-main);
+        }
+
+        li {
+            margin-bottom: 8px;
+            padding-left: 4px;
+        }
+
+        /* =========================
+           CARDS
+        ========================= */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+            margin-top: 24px;
+        }
+
+        .card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 24px;
+            background: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        .card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: var(--text-heading);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card p {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-bottom: 0;
+        }
+
+        /* =========================
+           CODE BLOCKS
+        ========================= */
+        .code-wrapper {
+            position: relative;
+            margin: 20px 0;
+        }
+
+        pre {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: var(--radius-md);
+            overflow-x: auto;
+            font-size: 0.875rem;
+            line-height: 1.6;
+            border: 1px solid #1e293b;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        code {
+            font-family: 'Fira Code', Consolas, Monaco, monospace;
+        }
+
+        .inline-code {
+            background: #f1f5f9;
+            color: #0f172a;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.85em;
+            border: 1px solid #e2e8f0;
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            padding: 6px 10px;
+            border-radius: var(--radius-sm);
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+        }
+
+        /* =========================
+           CALLOUT BOXES
+        ========================= */
+        .callout {
+            padding: 18px 20px;
+            margin: 20px 0;
+            border-radius: var(--radius-md);
+            display: flex;
+            gap: 14px;
+            align-items: flex-start;
+        }
+
+        .callout i {
+            font-size: 1.25rem;
+            margin-top: 2px;
+        }
+
+        .callout-content {
+            flex: 1;
+        }
+
+        .callout-content strong {
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .note {
+            background: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-left: 4px solid #0284c7;
+            color: #0369a1;
+        }
+
+        .tip {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-left: 4px solid #16a34a;
+            color: #15803d;
+        }
+
+        .warning {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-left: 4px solid #d97706;
+            color: #b45309;
+        }
+
+        /* =========================
+           TABLES
+        ========================= */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            margin: 20px 0;
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.9rem;
+        }
+
+        th {
+            background: #f8fafc;
+            color: var(--text-heading);
+            padding: 14px 18px;
+            font-weight: 600;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px 18px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-main);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        tr:nth-child(even) {
+            background: #fafafa;
+        }
+
+        /* =========================
+           FLOW CHART
+        ========================= */
+        .flow {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: var(--radius-md);
+            border: 1px dashed var(--border-color);
+        }
+
+        .flow-box {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 10px 18px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+            font-size: 0.875rem;
+            color: var(--text-heading);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .arrow {
+            font-size: 1rem;
+            color: #94a3b8;
+        }
+
+        /* =========================
+           FEEDBACK & FOOTER
+        ========================= */
+        .feedback-section {
+            margin-top: 40px;
+            padding: 40px;
+            background: #ffffff;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .feedback-container {
+            max-width: 650px;
+            margin: 0 auto;
+        }
+
+        .feedback-container h2 {
+            margin-bottom: 8px;
+            font-size: 1.5rem;
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+
+        .feedback-intro {
+            color: var(--text-muted);
+            margin-bottom: 24px;
+            font-size: 0.95rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.875rem;
+            color: var(--text-heading);
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 0.95rem;
+            font-family: inherit;
+            background: #ffffff;
+            color: var(--text-main);
+            transition: all 0.2s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-dark);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15);
+        }
+
+        .form-group textarea {
+            resize: vertical;
+        }
+
+        .feedback-btn {
+            width: 100%;
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-md);
+            background: var(--sidebar-bg);
+            color: white;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .feedback-btn:hover {
+            background: var(--sidebar-hover);
+            box-shadow: var(--shadow-md);
+        }
+
+        .site-footer {
+            padding: 40px 20px 20px;
+            text-align: center;
+            color: var(--text-muted);
+        }
+
+        .footer-author {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .footer-author strong {
+            font-size: 1.1rem;
+            color: var(--text-heading);
+        }
+
+        .footer-author span {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        .footer-license {
+            font-size: 0.8rem;
+            line-height: 1.6;
+            color: #94a3b8;
+        }
+
+        /* =========================
+           RESPONSIVE BREAKPOINTS
+        ========================= */
+        @media (max-width: 1024px) {
+            .main {
+                padding: 30px 24px;
+            }
+        }
+
+        @media (max-width: 850px) {
+            .mobile-header {
+                display: flex;
+            }
+
+            .sidebar-overlay {
+                display: block;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                top: 0;
+                padding-top: 20px;
+                box-shadow: var(--shadow-lg);
+            }
+
+            .sidebar.active {
+                transform: translateX(0);
+            }
+
+            .sidebar-overlay.active {
+                opacity: 1;
+                pointer-events: auto;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 80px 16px 20px 16px; /* 80px top padding for mobile header */
+            }
+
+            .hero {
+                padding: 32px 24px;
+            }
+
+            .hero h1 {
+                font-size: 1.8rem;
+            }
+
+            section {
+                padding: 24px;
+            }
+
+            .flow {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- Mobile Header -->
+<header class="mobile-header">
+    <div class="logo-text">
+        <i class="fa-solid fa-spider"></i> Scrapy Guide
+    </div>
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle Navigation">
+        <i class="fa-solid fa-bars"></i>
+    </button>
+</header>
+
+<!-- Overlay for mobile menu -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+    <div class="logo">
+        <h1><i class="fa-solid fa-spider"></i> Scrapy</h1>
+        <p>Easy Learning Guide</p>
+    </div>
+
+    <h3>Getting Started</h3>
+    <a href="#overview">1. Scrapy Overview</a>
+    <a href="#why-scrapy">2. Why Scrapy?</a>
+    <a href="#installation">3. Installation</a>
+    <a href="#project">4. Create Project</a>
+
+    <h3>Core Concepts</h3>
+    <a href="#structure">5. Project Structure</a>
+    <a href="#spider">6. Spider</a>
+    <a href="#requests">7. Requests</a>
+    <a href="#response">8. Response</a>
+    <a href="#callback">9. Callback</a>
+
+    <h3>Data Extraction</h3>
+    <a href="#selectors">10. Selectors</a>
+    <a href="#xpath">11. XPath</a>
+    <a href="#css">12. CSS Selectors</a>
+    <a href="#items">13. Items</a>
+
+    <h3>Crawling</h3>
+    <a href="#pagination">14. Pagination</a>
+    <a href="#follow-links">15. Following Links</a>
+    <a href="#start-urls">16. Multiple URLs</a>
+
+    <h3>Data Processing</h3>
+    <a href="#pipeline">17. Item Pipeline</a>
+    <a href="#export">18. Export Data</a>
+    <a href="#cleaning">19. Data Cleaning</a>
+
+    <h3>Advanced Scrapy</h3>
+    <a href="#middleware">20. Middleware</a>
+    <a href="#settings">21. Settings</a>
+    <a href="#concurrency">22. Concurrency</a>
+    <a href="#logging">23. Logging</a>
+
+    <h3>Real-World Scraping</h3>
+    <a href="#dynamic">24. Dynamic Websites</a>
+    <a href="#playwright">25. Scrapy + Playwright</a>
+    <a href="#blocking">26. Blocking</a>
+    <a href="#scaling">27. Scaling</a>
+
+    <h3>Practical</h3>
+    <a href="#commands">28. Useful Commands</a>
+    <a href="#workflow">29. Complete Workflow</a>
+    <a href="#best-practices">30. Best Practices</a>
+    <a href="#summary">31. Final Summary</a>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+    <!-- HERO -->
+    <div class="hero">
+        <span class="badge"><i class="fa-solid fa-code"></i> Python Web Scraping</span>
+        <h1>Scrapy — Easy Learning Guide</h1>
+        <p>
+            A beginner-friendly guide to learning Scrapy step-by-step.
+            Understand how Scrapy projects, spiders, requests, responses,
+            selectors, crawling, pipelines and middleware work together.
+        </p>
+    </div>
+
+    <!-- 1 -->
+    <section id="overview">
+        <h2>1. What is Scrapy?</h2>
+        <p>
+            <strong>Scrapy</strong> is a Python framework used to build web crawlers and web scrapers.
+        </p>
+        <p>
+            Instead of manually writing requests and loops, Scrapy gives us a complete system for sending requests, receiving pages, extracting data and processing the results.
+        </p>
+
+        <div class="callout note">
+            <i class="fa-solid fa-circle-info"></i>
+            <div class="callout-content">
+                <strong>Simple idea:</strong>
+                Scrapy = Request → Download → Parse → Extract → Process → Save
+            </div>
+        </div>
+
+        <div class="cards">
+            <div class="card">
+                <h3>🌐 Request</h3>
+                <p>Ask a website for a web page.</p>
+            </div>
+            <div class="card">
+                <h3>📄 Response</h3>
+                <p>Receive HTML content from the server.</p>
+            </div>
+            <div class="card">
+                <h3>🔎 Selector</h3>
+                <p>Find the required information.</p>
+            </div>
+            <div class="card">
+                <h3>💾 Pipeline</h3>
+                <p>Clean and store scraped data.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2 -->
+    <section id="why-scrapy">
+        <h2>2. Why Use Scrapy?</h2>
+        <ul>
+            <li>Fast web scraping</li>
+            <li>Concurrent requests</li>
+            <li>Automatic request scheduling</li>
+            <li>Retry support</li>
+            <li>XPath and CSS selectors</li>
+            <li>Pagination and link following</li>
+            <li>Item pipelines</li>
+            <li>Downloader middleware</li>
+            <li>Export to JSON, CSV and other formats</li>
+            <li>Large community and extensions</li>
+        </ul>
+
+        <div class="callout tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div class="callout-content">
+                Scrapy is especially useful when your project needs to crawl many pages rather than just downloading one page.
+            </div>
+        </div>
+    </section>
+
+    <!-- 3 -->
+    <section id="installation">
+        <h2>3. Install Scrapy</h2>
+        <p>First create a virtual environment:</p>
+        <div class="code-wrapper">
+            <pre><code>python -m venv venv</code></pre>
+        </div>
+
+        <p>Activate it on Windows:</p>
+        <div class="code-wrapper">
+            <pre><code>venv\Scripts\activate</code></pre>
+        </div>
+
+        <p>Install Scrapy:</p>
+        <div class="code-wrapper">
+            <pre><code>pip install scrapy</code></pre>
+        </div>
+
+        <p>Check installation:</p>
+        <div class="code-wrapper">
+            <pre><code>scrapy version</code></pre>
+        </div>
+    </section>
+
+    <!-- 4 -->
+    <section id="project">
+        <h2>4. Create a Scrapy Project</h2>
+        <p>Use the following command:</p>
+        <div class="code-wrapper">
+            <pre><code>scrapy startproject bookscraper</code></pre>
+        </div>
+
+        <p>Move inside the project:</p>
+        <div class="code-wrapper">
+            <pre><code>cd bookscraper</code></pre>
+        </div>
+
+        <p>Create a spider:</p>
+        <div class="code-wrapper">
+            <pre><code>scrapy genspider books books.toscrape.com</code></pre>
+        </div>
+
+        <div class="callout tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div class="callout-content">
+                <strong>Remember:</strong> Project = complete Scrapy application. Spider = individual crawler inside the project.
+            </div>
+        </div>
+    </section>
+
+    <!-- 5 -->
+    <section id="structure">
+        <h2>5. Scrapy Project Structure</h2>
+        <div class="code-wrapper">
+<pre><code>bookscraper/
+│
+├── scrapy.cfg
+│
+└── bookscraper/
+    ├── __init__.py
+    ├── items.py
+    ├── middlewares.py
+    ├── pipelines.py
+    ├── settings.py
+    │
+    └── spiders/
+        ├── __init__.py
+        └── books.py</code></pre>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>File</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="inline-code">spiders/</span></td>
+                        <td>Contains spiders.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">items.py</span></td>
+                        <td>Defines scraped data structure.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">pipelines.py</span></td>
+                        <td>Cleans and stores scraped data.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">middlewares.py</span></td>
+                        <td>Processes requests and responses.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">settings.py</span></td>
+                        <td>Controls project configuration.</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">scrapy.cfg</span></td>
+                        <td>Project configuration entry point.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 6 -->
+    <section id="spider">
+        <h2>6. Spider</h2>
+        <p>
+            A spider contains the logic that tells Scrapy:
+            <strong>where to start and what data to extract.</strong>
+        </p>
+        <div class="code-wrapper">
+<pre><code>import scrapy
+
+class BooksSpider(scrapy.Spider):
+    name = "books"
+    allowed_domains = ["books.toscrape.com"]
+    start_urls = ["https://books.toscrape.com/"]
+
+    def parse(self, response):
+        print(response.url)</code></pre>
+        </div>
+
+        <h3>Important attributes</h3>
+        <ul>
+            <li><strong>name</strong> → unique spider name</li>
+            <li><strong>allowed_domains</strong> → domains allowed for crawling</li>
+            <li><strong>start_urls</strong> → initial URLs</li>
+            <li><strong>parse()</strong> → default callback</li>
+        </ul>
+    </section>
+
+    <!-- 7 -->
+    <section id="requests">
+        <h2>7. Requests</h2>
+        <p>A Request tells Scrapy which URL should be downloaded.</p>
+        <div class="code-wrapper">
+<pre><code>yield scrapy.Request(
+    url="https://example.com",
+    callback=self.parse
+)</code></pre>
+        </div>
+        <p>Scrapy schedules the request and downloads the page.</p>
+    </section>
+
+    <!-- 8 -->
+    <section id="response">
+        <h2>8. Response</h2>
+        <p>After Scrapy downloads a page, the response object contains information about that page.</p>
+        <div class="code-wrapper">
+<pre><code>def parse(self, response):
+    print(response.url)
+    print(response.status)
+    print(response.text)</code></pre>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Property</th>
+                        <th>Meaning</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="inline-code">response.url</span></td>
+                        <td>Current URL</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">response.status</span></td>
+                        <td>HTTP status code</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">response.text</span></td>
+                        <td>HTML content</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">response.css()</span></td>
+                        <td>CSS selection</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">response.xpath()</span></td>
+                        <td>XPath selection</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 9 -->
+    <section id="callback">
+        <h2>9. Callback</h2>
+        <p>A callback is a function that Scrapy executes after a request receives a response.</p>
+        <div class="code-wrapper">
+<pre><code>yield scrapy.Request(
+    url,
+    callback=self.parse_product
+)
+
+def parse_product(self, response):
+    print("Product page received")</code></pre>
+        </div>
+
+        <div class="callout note">
+            <i class="fa-solid fa-circle-info"></i>
+            <div class="callout-content">
+                Think of callback as: <strong>"When the page arrives, run this function."</strong>
+            </div>
+        </div>
+    </section>
+
+    <!-- 10 -->
+    <section id="selectors">
+        <h2>10. Selectors</h2>
+        <p>Selectors are used to locate information inside HTML.</p>
+
+        <div class="cards">
+            <div class="card">
+                <h3>CSS</h3>
+                <p>Easy and commonly used.</p>
+            </div>
+            <div class="card">
+                <h3>XPath</h3>
+                <p>Powerful and flexible.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 11 -->
+    <section id="xpath">
+        <h2>11. XPath</h2>
+        <p>Example HTML:</p>
+        <div class="code-wrapper">
+<pre><code>&lt;h1 class="title"&gt;
+    Python Book
+&lt;/h1&gt;</code></pre>
+        </div>
+
+        <p>Extract the text:</p>
+        <div class="code-wrapper">
+<pre><code>title = response.xpath('//h1[@class="title"]/text()').get()</code></pre>
+        </div>
+
+        <p>Get multiple values:</p>
+        <div class="code-wrapper">
+<pre><code>titles = response.xpath('//h1[@class="title"]/text()').getall()</code></pre>
+        </div>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Method</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="inline-code">.get()</span></td>
+                        <td>Get first result</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">.getall()</span></td>
+                        <td>Get all results</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- 12 -->
+    <section id="css">
+        <h2>12. CSS Selectors</h2>
+        <p>CSS selectors are usually easier for beginners.</p>
+        <div class="code-wrapper">
+<pre><code># Get one title
+title = response.css("h1.title::text").get()
+
+# Get all titles
+titles = response.css("h1.title::text").getall()
+
+# Get href
+url = response.css("a.product::attr(href)").get()</code></pre>
+        </div>
+
+        <div class="callout tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div class="callout-content">
+                Use CSS when the HTML structure is simple. Use XPath when you need more complex relationships.
+            </div>
+        </div>
+    </section>
+
+    <!-- 13 -->
+    <section id="items">
+        <h2>13. Items</h2>
+        <p>Items provide a structured way to define the data you want to scrape.</p>
+        <p><strong>items.py</strong></p>
+        <div class="code-wrapper">
+<pre><code>import scrapy
+
+class BookItem(scrapy.Item):
+    title = scrapy.Field()
+    price = scrapy.Field()
+    rating = scrapy.Field()
+    url = scrapy.Field()</code></pre>
+        </div>
+
+        <p>Use the item inside your spider:</p>
+        <div class="code-wrapper">
+<pre><code>item = BookItem()
+item["title"] = title
+item["price"] = price
+
+yield item</code></pre>
+        </div>
+    </section>
+
+    <!-- 14 -->
+    <section id="pagination">
+        <h2>14. Pagination</h2>
+        <p>Pagination means moving from page 1 → page 2 → page 3...</p>
+        <div class="code-wrapper">
+<pre><code>next_page = response.css("li.next a::attr(href)").get()
+
+if next_page:
+    yield response.follow(
+        next_page,
+        callback=self.parse
+    )</code></pre>
+        </div>
+
+        <div class="callout note">
+            <i class="fa-solid fa-circle-info"></i>
+            <div class="callout-content">
+                This allows Scrapy to automatically continue crawling additional pages.
+            </div>
+        </div>
+    </section>
+
+    <!-- 15 -->
+    <section id="follow-links">
+        <h2>15. Following Links</h2>
+        <p>Scrapy provides <span class="inline-code">response.follow()</span> to conveniently follow links.</p>
+        <div class="code-wrapper">
+<pre><code>product_url = response.css("a.product::attr(href)").get()
+
+yield response.follow(
+    product_url,
+    callback=self.parse_product
+)</code></pre>
+        </div>
+    </section>
+
+    <!-- 16 -->
+    <section id="start-urls">
+        <h2>16. Multiple Start URLs</h2>
+        <div class="code-wrapper">
+<pre><code>start_urls = [
+    "https://example.com/page/1",
+    "https://example.com/page/2",
+    "https://example.com/page/3"
+]</code></pre>
+        </div>
+        <p>Scrapy will start requests for each URL.</p>
+    </section>
+
+    <!-- 17 -->
+    <section id="pipeline">
+        <h2>17. Item Pipeline</h2>
+        <p>Pipelines receive scraped items after they are produced by the spider.</p>
+        <p>Typical pipeline responsibilities:</p>
+        <ul>
+            <li>Clean data</li>
+            <li>Validate data</li>
+            <li>Remove duplicates</li>
+            <li>Transform values</li>
+            <li>Save data to database</li>
+        </ul>
+
+        <div class="code-wrapper">
+<pre><code>class BooksPipeline:
+    def process_item(self, item, spider):
+        item["title"] = item["title"].strip()
+        return item</code></pre>
+        </div>
+    </section>
+
+    <!-- 18 -->
+    <section id="export">
+        <h2>18. Export Scraped Data</h2>
+        <p>Scrapy can export data directly.</p>
+        <div class="code-wrapper">
+            <pre><code>scrapy crawl books -o books.json</code></pre>
+        </div>
+        <div class="code-wrapper">
+            <pre><code>scrapy crawl books -o books.csv</code></pre>
+        </div>
+
+        <div class="callout tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div class="callout-content">
+                For small projects, Scrapy's built-in feed exports can be enough. For production systems, pipelines are often more useful.
+            </div>
+        </div>
+    </section>
+
+    <!-- 19 -->
+    <section id="cleaning">
+        <h2>19. Data Cleaning</h2>
+        <p>Example:</p>
+        <div class="code-wrapper">
+<pre><code>title = response.css("h3 a::attr(title)").get()
+title = title.strip()</code></pre>
+        </div>
+
+        <p>Price conversion:</p>
+        <div class="code-wrapper">
+<pre><code>price = response.css(".price_color::text").get()
+price = price.replace("£", "")
+price = float(price)</code></pre>
+        </div>
+    </section>
+
+    <!-- 20 -->
+    <section id="middleware">
+        <h2>20. Downloader Middleware</h2>
+        <p>Middleware sits between Scrapy's engine and downloader.</p>
+
+        <div class="flow">
+            <div class="flow-box">Spider</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Engine</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Middleware</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Downloader</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Website</div>
+        </div>
+
+        <p>Middleware can be used for things such as:</p>
+        <ul>
+            <li>Headers</li>
+            <li>Cookies</li>
+            <li>Proxy configuration</li>
+            <li>Request modification</li>
+            <li>Response processing</li>
+        </ul>
+    </section>
+
+    <!-- 21 -->
+    <section id="settings">
+        <h2>21. Settings</h2>
+        <p>Scrapy settings control how the scraper behaves.</p>
+        <div class="code-wrapper">
+<pre><code># settings.py
+ROBOTSTXT_OBEY = True
+CONCURRENT_REQUESTS = 8
+DOWNLOAD_DELAY = 1
+
+FEEDS = {
+    "data.json": {
+        "format": "json"
+    }
+}</code></pre>
+        </div>
+
+        <div class="callout warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <div class="callout-content">
+                Do not blindly increase concurrency. Respect website policies and avoid unnecessarily aggressive traffic.
+            </div>
+        </div>
+    </section>
+
+    <!-- 22 -->
+    <section id="concurrency">
+        <h2>22. Concurrency</h2>
+        <p>One of Scrapy's major advantages is that it can process multiple requests efficiently.</p>
+        <div class="code-wrapper">
+<pre><code>CONCURRENT_REQUESTS = 16</code></pre>
+        </div>
+        <p>Higher concurrency can improve speed, but it should be balanced against server load and site restrictions.</p>
+    </section>
+
+    <!-- 23 -->
+    <section id="logging">
+        <h2>23. Logging</h2>
+        <p>Scrapy automatically provides useful logs while crawling.</p>
+        <div class="code-wrapper">
+            <pre><code>scrapy crawl books</code></pre>
+        </div>
+
+        <p>You can control logging:</p>
+        <div class="code-wrapper">
+            <pre><code>LOG_LEVEL = "INFO"</code></pre>
+        </div>
+
+        <p>Common levels:</p>
+        <ul>
+            <li>DEBUG</li>
+            <li>INFO</li>
+            <li>WARNING</li>
+            <li>ERROR</li>
+            <li>CRITICAL</li>
+        </ul>
+    </section>
+
+    <!-- 24 -->
+    <section id="dynamic">
+        <h2>24. Dynamic Websites</h2>
+        <p>Some websites use JavaScript to load information after the initial HTML response.</p>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Static Page</h3>
+                <p>Data exists directly in the HTML response.</p>
+            </div>
+            <div class="card">
+                <h3>Dynamic Page</h3>
+                <p>JavaScript may load data after the page loads.</p>
+            </div>
+        </div>
+
+        <div class="callout note">
+            <i class="fa-solid fa-circle-info"></i>
+            <div class="callout-content">
+                Scrapy itself is primarily an HTTP-based framework. For JavaScript-heavy pages, integrations such as Scrapy + Playwright can be used.
+            </div>
+        </div>
+    </section>
+
+    <!-- 25 -->
+    <section id="playwright">
+        <h2>25. Scrapy + Playwright</h2>
+        <p>Scrapy can be integrated with Playwright when browser rendering or interaction is needed.</p>
+        <p>Install:</p>
+        <div class="code-wrapper">
+<pre><code>pip install scrapy-playwright
+playwright install</code></pre>
+        </div>
+
+        <p>Example request:</p>
+        <div class="code-wrapper">
+<pre><code>yield scrapy.Request(
+    url,
+    meta={"playwright": True},
+    callback=self.parse
+)</code></pre>
+        </div>
+
+        <div class="callout tip">
+            <i class="fa-solid fa-lightbulb"></i>
+            <div class="callout-content">
+                Use browser automation when the required information cannot reasonably be obtained from normal HTTP responses.
+            </div>
+        </div>
+    </section>
+
+    <!-- 26 -->
+    <section id="blocking">
+        <h2>26. Scraper Blocking</h2>
+        <p>Websites may detect or restrict automated traffic.</p>
+        <p>Common causes include:</p>
+        <ul>
+            <li>Too many requests</li>
+            <li>Unusual request patterns</li>
+            <li>Missing or inconsistent headers</li>
+            <li>IP restrictions</li>
+            <li>Bot detection systems</li>
+        </ul>
+
+        <p>Responsible approaches include:</p>
+        <ul>
+            <li>Respect robots.txt and site policies where applicable</li>
+            <li>Use reasonable request rates</li>
+            <li>Use appropriate headers</li>
+            <li>Implement retries carefully</li>
+            <li>Cache data when possible</li>
+        </ul>
+    </section>
+
+    <!-- 27 -->
+    <section id="scaling">
+        <h2>27. Scaling Scrapy</h2>
+        <p>Scrapy is designed for large crawling workloads and can be extended for distributed scraping.</p>
+        <p>Common scaling concepts:</p>
+        <ul>
+            <li>Concurrency</li>
+            <li>Distributed workers</li>
+            <li>Queues</li>
+            <li>Persistent storage</li>
+            <li>Caching</li>
+            <li>Monitoring</li>
+        </ul>
+
+        <div class="callout note">
+            <i class="fa-solid fa-circle-info"></i>
+            <div class="callout-content">
+                Start with a simple spider. Scale only when the project actually needs more throughput.
+            </div>
+        </div>
+    </section>
+
+    <!-- 28 -->
+    <section id="commands">
+        <h2>28. Useful Scrapy Commands</h2>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Command</th>
+                        <th>Purpose</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><span class="inline-code">scrapy startproject</span></td>
+                        <td>Create project</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">scrapy genspider</span></td>
+                        <td>Create spider</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">scrapy crawl</span></td>
+                        <td>Run spider</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">scrapy list</span></td>
+                        <td>List spiders</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">scrapy check</span></td>
+                        <td>Check project</td>
+                    </tr>
+                    <tr>
+                        <td><span class="inline-code">scrapy shell</span></td>
+                        <td>Test selectors interactively</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="code-wrapper">
+<pre><code># Start project
+scrapy startproject myproject
+
+# Create spider
+scrapy genspider products example.com
+
+# List spiders
+scrapy list
+
+# Run spider
+scrapy crawl products
+
+# Export CSV
+scrapy crawl products -o products.csv
+
+# Open shell
+scrapy shell "https://example.com"</code></pre>
+        </div>
+    </section>
+
+    <!-- 29 -->
+    <section id="workflow">
+        <h2>29. Complete Scrapy Workflow</h2>
+        <div class="flow">
+            <div class="flow-box">Start URL</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Request</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Downloader</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Response</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Spider</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Selector</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Item</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Pipeline</div>
+            <span class="arrow"><i class="fa-solid fa-arrow-right"></i></span>
+            <div class="flow-box">Database/File</div>
+        </div>
+
+        <h3>Easy way to remember</h3>
+        <div class="code-wrapper">
+<pre><code>URL → Request → Download HTML → Response → Parse → Extract → Item → Pipeline → Save</code></pre>
+        </div>
+    </section>
+
+    <!-- 30 -->
+    <section id="best-practices">
+        <h2>30. Scrapy Best Practices</h2>
+        <ol>
+            <li>Use meaningful spider names.</li>
+            <li>Keep extraction logic simple.</li>
+            <li>Use CSS/XPath selectors carefully.</li>
+            <li>Validate extracted data.</li>
+            <li>Use pipelines for cleaning and storage.</li>
+            <li>Use reasonable concurrency.</li>
+            <li>Handle pagination explicitly.</li>
+            <li>Handle missing fields safely.</li>
+            <li>Log important errors.</li>
+            <li>Respect website terms and access policies.</li>
+        </ol>
+    </section>
+
+    <!-- 31 -->
+    <section id="summary">
+        <h2>31. Final Summary</h2>
+        <p>Scrapy is a powerful Python framework for building structured and scalable web crawlers.</p>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Spider</h3>
+                <p>Controls crawling and extraction logic.</p>
+            </div>
+            <div class="card">
+                <h3>Request</h3>
+                <p>Tells Scrapy which URL to download.</p>
+            </div>
+            <div class="card">
+                <h3>Response</h3>
+                <p>Contains the downloaded page.</p>
+            </div>
+            <div class="card">
+                <h3>Selector</h3>
+                <p>Finds information in HTML.</p>
+            </div>
+            <div class="card">
+                <h3>Item</h3>
+                <p>Represents structured scraped data.</p>
+            </div>
+            <div class="card">
+                <h3>Pipeline</h3>
+                <p>Cleans and stores scraped data.</p>
+            </div>
+            <div class="card">
+                <h3>Middleware</h3>
+                <p>Customizes requests and responses.</p>
+            </div>
+            <div class="card">
+                <h3>Settings</h3>
+                <p>Controls Scrapy behavior.</p>
+            </div>
+        </div>
+
+        <div class="callout tip" style="margin-top: 24px;">
+            <i class="fa-solid fa-graduation-cap"></i>
+            <div class="callout-content">
+                <strong>Learning Path:</strong><br>
+                Python Web Scraping → HTTP Requests → HTML → CSS Selectors → XPath → Scrapy → Spiders → Pagination → Pipelines → Middleware → Playwright → Production Scraping
+            </div>
+        </div>
+    </section>
+
+<!--    &lt;!&ndash; Feedback Section &ndash;&gt;-->
+<!--    <section id="feedback" class="feedback-section">-->
+<!--        <div class="feedback-container">-->
+<!--            <h2><i class="fa-regular fa-comments"></i> Send Feedback</h2>-->
+<!--            <p class="feedback-intro">-->
+<!--                Have a suggestion, correction, or question? Send your feedback directly via email.-->
+<!--            </p>-->
+
+<!--            <form action="mailto:contact.abhassan@gmail.com" method="post" enctype="text/plain">-->
+<!--                <div class="form-group">-->
+<!--                    <label for="email">Email Address</label>-->
+<!--                    <input type="email" id="email" name="Email" placeholder="Enter your email address" required>-->
+<!--                </div>-->
+
+<!--                <div class="form-group">-->
+<!--                    <label for="comment">Comment / Feedback</label>-->
+<!--                    <textarea id="comment" name="Comment" rows="5" placeholder="Write your feedback here..." required></textarea>-->
+<!--                </div>-->
+
+<!--                <button type="submit" class="feedback-btn">-->
+<!--                    <i class="fa-regular fa-paper-plane"></i> Send Feedback-->
+<!--                </button>-->
+<!--            </form>-->
+<!--        </div>-->
+<!--    </section>-->
+
+<style>
+  .site-footer {
+    background-color: #0f172a;
+    color: #94a3b8;
+    padding: 60px 48px 24px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    text-align: left;
+  }
+
+  .footer-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 2fr repeat(3, 1fr);
+    gap: 40px;
+    padding-bottom: 40px;
+  }
+
+  .footer-brand .footer-logo {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+    text-align: left;
+  }
+
+  .footer-brand .footer-logo i {
+    color: #38bdf8;
+    text-align: left;
+  }
+
+  .footer-brand p {
+    color: #64748b;
+    margin-bottom: 20px;
+    margin-left: 0;
+    margin-right: auto;
+    max-width: 300px;
+    font-size: 0.875rem;
+    text-align: left;
+  }
+
+  .footer-socials {
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+  }
+
+  .footer-socials a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: #1e293b;
+    color: #94a3b8;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .footer-socials a:hover {
+    background: #38bdf8;
+    color: #0f172a;
+    transform: translateY(-2px);
+  }
+
+  .footer-col h4 {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 16px;
+    letter-spacing: 0.5px;
+    text-align: left;
+  }
+
+  .footer-col ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .footer-col ul li {
+    margin-bottom: 10px;
+    padding-left: 0;
+    text-align: left;
+  }
+
+  .footer-col ul a {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: color 0.2s ease;
+  }
+
+  .footer-col ul a:hover {
+    color: #38bdf8;
+  }
+
+  .footer-author-info {
+    text-align: left;
+  }
+
+  .footer-author-info strong {
+    display: block;
+    color: #ffffff;
+    font-size: 0.95rem;
+  }
+
+  .footer-author-info span {
+    font-size: 0.85rem;
+    color: #64748b;
+  }
+
+  .footer-bottom {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding-top: 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    font-size: 0.8rem;
+    color: #64748b;
+  }
+
+  .footer-copy {
+    text-align: left;
+  }
+
+  .footer-bottom-links {
+    display: flex;
+    justify-content: flex-start;
+    gap: 20px;
+  }
+
+  .footer-bottom-links a {
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s ease;
+  }
+
+  .footer-bottom-links a:hover {
+    color: #94a3b8;
+  }
+
+  @media (max-width: 850px) {
+    .footer-container {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 500px) {
+    .footer-container {
+      grid-template-columns: 1fr;
+    }
+    .footer-bottom {
+      flex-direction: column;
+      align-items: flex-start;
+      text-align: left;
+    }
+  }
+</style>
+
+<footer class="site-footer">
+  <div class="footer-container">
+    <!-- Brand & Socials -->
+    <div class="footer-brand">
+      <div class="footer-logo">
+        <i class="fa-solid fa-spider"></i> Scrapy Guide
+      </div>
+      <p>A comprehensive, step-by-step learning guide for web scraping &amp; data extraction in Python.</p>
+      <div class="footer-socials">
+        <a href="https://github.com/A-Hassan001" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fa-brands fa-github"></i></a>
+        <a href="https://www.linkedin.com/in/ali-hassan-847933285" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+        <a href="#" aria-label="Twitter"><i class="fa-brands fa-twitter"></i></a>
+        <a href="https://portfolio-aliz.vercel.app/portfolio.html" target="_blank" rel="noopener noreferrer" aria-label="Globe"><i class="fa-solid fa-globe"></i></a>
+      </div>
+    </div>
+
+    <!-- Navigation Column 1 -->
+    <div class="footer-col">
+      <h4>Getting Started</h4>
+      <ul>
+        <li><a href="#overview">Scrapy Overview</a></li>
+        <li><a href="#why-scrapy">Why Scrapy?</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#project">Create Project</a></li>
+        <li><a href="#structure">Project Structure</a></li>
+      </ul>
+    </div>
+
+    <!-- Navigation Column 2 -->
+    <div class="footer-col">
+      <h4>Core Topics</h4>
+      <ul>
+        <li><a href="#spider">Spiders &amp; Requests</a></li>
+        <li><a href="#selectors">XPath &amp; CSS Selectors</a></li>
+        <li><a href="#pipeline">Item Pipelines</a></li>
+        <li><a href="#middleware">Downloader Middleware</a></li>
+        <li><a href="#playwright">Scrapy + Playwright</a></li>
+      </ul>
+    </div>
+
+    <!-- Author Info -->
+    <div class="footer-col">
+      <h4>Created By</h4>
+      <div class="footer-author-info">
+        <strong>Ali Hassan</strong>
+        <span>Web Scraping &amp; Data Engineer</span>
+      </div>
+      <ul style="margin-top: 12px;">
+        <li><a href="#feedback">Send Feedback</a></li>
+        <li><a href="#best-practices">Best Practices</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Bottom Bar -->
+  <div class="footer-bottom">
+    <div class="footer-copy">
+      © 2026 Ali Hassan. All rights reserved. Provided for educational purposes.
+    </div>
+    <div class="footer-bottom-links">
+      <a href="#overview">Documentation</a>
+      <a href="#best-practices">Ethics</a>
+      <a href="#feedback">Contact</a>
+    </div>
+  </div>
+</footer>
+
+<!--</main>-->
+
+<!--&lt;!&ndash; Interactive Logic &ndash;&gt;-->
+<!--<script>-->
+<!--    // Sidebar Mobile Drawer Functionality-->
+<!--    const menuToggle = document.getElementById('menuToggle');-->
+<!--    const sidebar = document.getElementById('sidebar');-->
+<!--    const overlay = document.getElementById('sidebarOverlay');-->
+<!--    const sidebarLinks = sidebar.querySelectorAll('a');-->
+
+<!--    function toggleMenu() {-->
+<!--        sidebar.classList.toggle('active');-->
+<!--        overlay.classList.toggle('active');-->
+<!--        document.body.style.overflow = sidebar.classList.contains('active') ? 'hidden' : '';-->
+<!--    }-->
+
+<!--    menuToggle.addEventListener('click', toggleMenu);-->
+<!--    overlay.addEventListener('click', toggleMenu);-->
+
+<!--    sidebarLinks.forEach(link => {-->
+<!--        link.addEventListener('click', () => {-->
+<!--            if (sidebar.classList.contains('active')) {-->
+<!--                toggleMenu();-->
+<!--            }-->
+<!--        });-->
+<!--    });-->
+
+<!--    // Add Copy Buttons to Code Blocks-->
+<!--    document.querySelectorAll('.code-wrapper').forEach(wrapper => {-->
+<!--        const button = document.createElement('button');-->
+<!--        button.className = 'copy-btn';-->
+<!--        button.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';-->
+
+<!--        button.addEventListener('click', () => {-->
+<!--            const code = wrapper.querySelector('code').innerText;-->
+<!--            navigator.clipboard.writeText(code).then(() => {-->
+<!--                button.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';-->
+<!--                setTimeout(() => {-->
+<!--                    button.innerHTML = '<i class="fa-regular fa-copy"></i> Copy';-->
+<!--                }, 2000);-->
+<!--            });-->
+<!--        });-->
+
+<!--        wrapper.appendChild(button);-->
+<!--    });-->
+<!--</script>-->
+
+</body>
+</html>
